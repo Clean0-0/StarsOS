@@ -1,5 +1,3 @@
 TODO:
-boot into kernel
-write bootloader with multiboot capabilities
 add a basic set of commands
-add the standard glibC library
+add the standard C library
