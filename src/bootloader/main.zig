@@ -9,6 +9,21 @@ const config = @import("./config.zig");
 const puts = output.puts;
 const printf = output.printf;
 
+
+fn countdown(countdown_enabled: bool) void {
+    // If enabled in the config, it will countdown for n seconds
+    // and close.
+    if (countdown_enabled == true) {
+        var wait_time = config.wait_time;
+        puts("This screen will close in: ");
+        while (wait_time > 0) : (wait_time -= 1) {
+            printf("{}...", .{wait_time});
+            _ = uefi.system_table.boot_services.?.stall(1_000_000) catch {};
+        }
+    }
+}
+
+
 pub fn main() void {
     
     // Initialises con_out
@@ -18,17 +33,8 @@ pub fn main() void {
     puts("starsOS bootloader v0.0.1\r\n");
     puts("Hello, World!\r\n");
 
-    const countdown = config.countdown;
+    const countdown_enabled = config.countdown;
+    countdown(countdown_enabled);
 
-    // If enabled in the config, it will countdown for n seconds
-    // and close.
-    if (countdown == true) {
-        var wait_time = config.wait_time;
-        puts("This screen will close in: ");
-        while (wait_time > 0) : (wait_time -= 1) {
-            printf("{}...", .{wait_time});
-            _ = uefi.system_table.boot_services.?.stall(1_000_000) catch {};
-        }
-    }
 }
 
