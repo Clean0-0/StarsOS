@@ -14,7 +14,10 @@ pub fn init() void {
     con_out.reset(false) catch {};
 }
 
-/// Function to simply put text to the UEFI console without formatting
+/// This function writes a UTF-8 string to the UEFI console as UTF-16.
+/// It will truncate messages exceeding 255 characters.
+/// Non-ASCII characters are narrowed to u16 without encoding conversion.
+/// Requires init() to have been called first.
 pub fn puts(msg: []const u8) void {
     
     // Create a buffer for the characters to be loaded into
@@ -26,18 +29,21 @@ pub fn puts(msg: []const u8) void {
     }
     // Add a zero to the end of the string to ensure it can be null terminated
     buffer[msg.len] = 0;
+
     // Actually output the string within the buffer
-    _ = con_out.outputString(&buffer) catch {};
+    _ = con_out.outputString(&buffer) catch unreachable;
 
 }
 
 /// Formatted printing function that prints to the UEFI console
+/// Requires init() to have been called first
+/// Example:
+///     printf("foo {}", .{bar});
 pub fn printf(comptime fmt: []const u8, args:anytype) void {
     var buffer: [256:0]u8 = undefined;
-    var msg: []u8 = undefined;
 
     // Calls a function to write and format string arguments
     // into the buffer.
-    msg = std.fmt.bufPrint(&buffer, fmt, args) catch unreachable;
+    const msg = std.fmt.bufPrint(&buffer, fmt, args) catch unreachable;
     puts(msg);
 }
